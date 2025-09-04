@@ -87,7 +87,7 @@ resource "aws_lb_target_group" "alb_tg_register" {
 }
 
 resource "aws_lb_listener" "alb_http_listener_h" {
-  load_balancer_arn = aws_lb.alb.id
+  load_balancer_arn = aws_lb.alb.arn
   port              = 80
   protocol          = "HTTP"
 
@@ -99,7 +99,7 @@ resource "aws_lb_listener" "alb_http_listener_h" {
 }
 
 resource "aws_lb_listener_rule" "alb_rule_images" {
-  listener_arn = aws_lb_listener.alb.id
+  listener_arn = aws_lb_listener.alb.arn
   priority     = 10
   action {
     type             = "forward"
@@ -113,7 +113,7 @@ resource "aws_lb_listener_rule" "alb_rule_images" {
 }
 
 resource "aws_lb_listener_rule" "alb_rule_register" {
-  listener_arn = aws_lb_listener.alb.id
+  listener_arn = aws_lb_listener.alb.arn
   priority     = 10
   action {
     type             = "forward"
