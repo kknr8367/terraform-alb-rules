@@ -112,7 +112,7 @@ resource "aws_lb_listener_rule" "alb_rule_images" {
   }
 }
 
-resource "aws_lb_listener_rule" "alb_rule_images" {
+resource "aws_lb_listener_rule" "alb_rule_register" {
   listener_arn = aws_lb_listener.alb.id
   priority     = 10
   action {
