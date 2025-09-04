@@ -126,9 +126,6 @@ resource "aws_lb_listener_rule" "alb_rule_images" {
   }
 }
 
-###
-Attaching Instances to the target groups
-###
 
 resource "aws_lb_target_group_attachment" "alb_tg_attach_home" {
   target_group_arn = aws_lb_target_group.alb_tg_home.arn
