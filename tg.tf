@@ -1,0 +1,148 @@
+resource "aws_lb" "alb" {
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.alb_sg.id]
+  subnets                    = [aws_subnet.public_subnet1.id, aws_subnet.public_subnet2.id, aws_subnet.public_subnet3.id]
+  enable_deletion_protection = false
+
+  tags = {
+    Name = "path-alb"
+  }
+}
+
+
+resource "aws_lb_target_group" "alb_tg_home" {
+  target_type = "instance"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main.id
+
+  health_check {
+    enabled             = true
+    interval            = 30
+    path                = "/"
+    timeout             = 5
+    matcher             = 200
+    healthy_threshold   = 2
+    unhealthy_threshold = 5
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = {
+    Name = "alb-tg-home"
+  }
+}
+
+resource "aws_lb_target_group" "alb_tg_images" {
+  target_type = "instance"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main.id
+
+  health_check {
+    enabled             = true
+    interval            = 30
+    path                = "/images/"
+    timeout             = 5
+    matcher             = 200
+    healthy_threshold   = 2
+    unhealthy_threshold = 5
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = {
+    Name = "alb-tg-images"
+  }
+}
+
+resource "aws_lb_target_group" "alb_tg_register" {
+  target_type = "instance"
+  port        = 80
+  protocol    = "HTTP"
+  vpc_id      = aws_vpc.main.id
+
+  health_check {
+    enabled             = true
+    interval            = 30
+    path                = "/register/"
+    timeout             = 5
+    matcher             = 200
+    healthy_threshold   = 2
+    unhealthy_threshold = 5
+  }
+
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = merge(var.common_tags, {
+    Name = "alb-tg-register"
+  })
+}
+
+resource "aws_lb_listener" "alb_http_listener_h" {
+  load_balancer_arn = aws_lb.alb.id
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.alb_tg_home.id
+
+  }
+}
+
+resource "aws_lb_listener_rule" "alb_rule_images" {
+  listener_arn = aws_lb_listener.alb.id
+  priority     = 10
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.alb_tg_images.arn
+  }
+  condition {
+    path_pattern {
+      values = ["/images/"]
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "alb_rule_images" {
+  listener_arn = aws_lb_listener.alb.id
+  priority     = 10
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.alb_tg_register.arn
+  }
+  condition {
+    path_pattern {
+      values = ["/register/"]
+    }
+  }
+}
+
+###
+Attaching Instances to the target groups
+###
+
+resource "aws_lb_target_group_attachment" "alb_tg_attach_home" {
+  target_group_arn = aws_lb_target_group.alb_tg_home.arn
+  target_id        = aws_instance.web_server_1.id
+}
+
+# Attach the images instance to the images target group
+resource "aws_lb_target_group_attachment" "alb_tg_attach_images" {
+  target_group_arn = aws_lb_target_group.alb_tg_images.arn
+  target_id        = aws_instance.web_server_2.id
+}
+
+# Attach the register instance to the register target group
+resource "aws_lb_target_group_attachment" "alb_tg_attach_register" {
+  target_group_arn = aws_lb_target_group.alb_tg_register.arn
+  target_id        = aws_instance.web_server_2.id
+}
