@@ -81,9 +81,9 @@ resource "aws_lb_target_group" "alb_tg_register" {
     create_before_destroy = true
   }
 
-  tags = merge(var.common_tags, {
-    Name = "alb-tg-register"
-  })
+  tags = {
+    Name = "tg-register"
+  }
 }
 
 resource "aws_lb_listener" "alb_http_listener_h" {
