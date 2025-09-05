@@ -13,6 +13,7 @@ resource "aws_instance" "web_server_1" {
               sudo systemctl start nginx
               sudo systemctl enable nginx
 
+              cat /dev/null  | sudo tee -a /usr/share/nginx/html/index.html
               echo "<h1>Home - Page!</h1>" | sudo tee -a /usr/share/nginx/html/index.html
 
               sudo chown -R nginx:nginx /usr/share/nginx/html
